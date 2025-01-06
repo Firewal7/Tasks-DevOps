@@ -99,7 +99,7 @@ CREATE TABLE kafka_data.kafka_messages (
 ORDER BY timestamp;
 ```
 
-#### Создайте таблицу для чтения данных из Kafka:
+#### Создаём таблицу для чтения данных из Kafka:
 ```
 CREATE TABLE kafka_data.kafka_raw (
     key String,
