@@ -13,7 +13,7 @@
 
 1. ВМ развернул на Yandex Cloud
 
-![alt](https://)
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/light/images/1.jpg)
 
 2. Установите Apache Kafka на kafka01.
 
@@ -63,7 +63,7 @@ provectuslabs/kafka-ui:latest
 
 4. Проверяем подключение Kafka UI к Kafka.
 
-![alt](https://)
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/light/images/4.jpg)
 
 5. Установливаем ClickHouse на db01.
 
@@ -126,5 +126,7 @@ FROM kafka_data.kafka_raw;
 
 7. Отправка сообщения в Kafka через Kafka UI
 
-![alt](https://)
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/light/images/7.jpg)
+
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/light/images/7-1.jpg)
 
