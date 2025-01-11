@@ -44,12 +44,12 @@ listeners=PLAINTEXT://:9092
 ```
 /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties &
 ```
-3. Установите Kafka UI на web01, убедитесь что web-интерфейс доступен из браузера.
-
-4. Создадим топик:
+#### Создадим топик:
 ```
 /opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic test-topic --partitions 1 --replication-factor 1
 ```
+
+3. Установите Kafka UI на web01, убедитесь что web-интерфейс доступен из браузера.
 
 #### Устанавливаем Docker: 
 ```
@@ -133,13 +133,15 @@ AS SELECT
 FROM kafka_data.kafka_raw;
 ```
 
-7. #### Отправка сообщения в Kafka через консоль:
+7. Отправка сообщения в Kafka через консоль на ВМ kafka01:
 
 ```
 echo '{"key": "value", "another_key": 123}' | /opt/kafka/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic test-topic
 ```
 
-8. #### Проверяем Clickhouse:
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/light/images/7.jpg)
+
+#### Проверяем Clickhouse:
 
 ![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/light/images/8.jpg)
 
