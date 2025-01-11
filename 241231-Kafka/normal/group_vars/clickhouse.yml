@@ -1,0 +1,15 @@
+# Default variables for ClickHouse
+clickhouse_repo_url: "https://packages.clickhouse.com/deb"
+clickhouse_gpg_key_url: "https://packages.clickhouse.com/rpm/lts/repodata/repomd.xml.key"
+clickhouse_keyring_path: "/usr/share/keyrings/clickhouse-keyring.gpg"
+clickhouse_packages:
+  - clickhouse-server
+  - clickhouse-client
+clickhouse_service_name: "clickhouse-server"
+clickhouse_http_port: 8123
+clickhouse_tcp_port: 9000
+log_level: "info"
+max_memory_usage: 10000000000
+max_threads: 8
+kafka_group_name: "clickhouse_group"
+create_kafka_tables: true

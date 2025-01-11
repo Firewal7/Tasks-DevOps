@@ -1,0 +1,48 @@
+---
+# roles/kafka/tasks/main.yml
+
+- name: Обновить список пакетов
+  apt:
+    update_cache: yes
+
+- name: Установить Java
+  apt:
+    name: openjdk-11-jdk
+    state: present
+
+- name: Скачать Kafka
+  get_url:
+    url: "https://dlcdn.apache.org/kafka/3.9.0/kafka_2.13-3.9.0.tgz"
+    dest: "/tmp/kafka.tgz"
+
+- name: Распаковать Kafka
+  unarchive:
+    src: "/tmp/kafka.tgz"
+    dest: "/opt/"
+    remote_src: yes
+
+- name: Переименовать директорию Kafka
+  command:
+    cmd: "mv /opt/kafka_2.13-3.9.0 /opt/kafka"
+    creates: "/opt/kafka"
+
+- name: Настроить Kafka (server.properties)
+  lineinfile:
+    path: "/opt/kafka/config/server.properties"
+    regexp: "^{{ item.key }}=.*"
+    line: "{{ item.key }}={{ item.value }}"
+  loop:
+    - { key: "broker.id", value: "1" }
+    - { key: "log.dirs", value: "/tmp/kafka-logs" }
+    - { key: "zookeeper.connect", value: "localhost:2181" }
+    - { key: "listeners", value: "PLAINTEXT://:9092" }
+
+- name: Запустить ZooKeeper
+  shell: "/opt/kafka/bin/zookeeper-server-start.sh /opt/kafka/config/zookeeper.properties &"
+  args:
+    executable: /bin/bash
+
+- name: Запустить Kafka
+  shell: "/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties &"
+  args:
+    executable: /bin/bash

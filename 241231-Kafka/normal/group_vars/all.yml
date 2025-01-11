@@ -1,0 +1,12 @@
+# Переменные для ClickHouse
+
+log_level: "info"
+max_memory_usage: 10000000000
+max_threads: 8
+kafka_group_name: "clickhouse_group"
+create_kafka_tables: true
+kafka_topic: "new_topic"
+
+
+clickhouse_http_port: 8123
+clickhouse_tcp_port: 9000

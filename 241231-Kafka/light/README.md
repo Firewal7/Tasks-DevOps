@@ -46,6 +46,11 @@ listeners=PLAINTEXT://:9092
 ```
 3. Установите Kafka UI на web01, убедитесь что web-интерфейс доступен из браузера.
 
+4. Создадим топик:
+```
+/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic test-topic --partitions 1 --replication-factor 1
+```
+
 #### Устанавливаем Docker: 
 ```
 sudo curl -fsSL https://get.docker.com -o get-docker.sh && sudo sh get-docker.sh
@@ -57,13 +62,15 @@ docker run -d \
 --name kafka-ui \
 -p 8080:8080 \
 -e KAFKA_CLUSTERS_0_NAME=local \
--e KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=158.160.3.109:9092 \
+-e KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=158.160.69.2:9092 \
 provectuslabs/kafka-ui:latest
 ```
 
 4. Проверяем подключение Kafka UI к Kafka.
 
 ![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/light/images/4.jpg)
+
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/light/images/4.1.jpg)
 
 5. Установливаем ClickHouse на db01.
 
@@ -75,7 +82,8 @@ echo "deb [signed-by=/usr/share/keyrings/clickhouse-keyring.gpg] https://package
     /etc/apt/sources.list.d/clickhouse.list
 sudo apt-get update
 
-sudo apt-get install -y clickhouse-server clickhouse-client
+sudo apt-get install -y clickhouse-server=24.12.2.29 clickhouse-client=24.12.2.29
+
 
 sudo service clickhouse-server start
 sudo service clickhouse-server status
@@ -110,6 +118,7 @@ SETTINGS kafka_broker_list = '158.160.3.109:9092',
          kafka_topic_list = 'test-topic',
          kafka_group_name = 'clickhouse_group',
          kafka_format = 'JSONEachRow',
+         kafka_row_delimiter = '\n',
          kafka_num_consumers = 1;
 ```
 
@@ -124,9 +133,14 @@ AS SELECT
 FROM kafka_data.kafka_raw;
 ```
 
-7. Отправка сообщения в Kafka через Kafka UI
+7. #### Отправка сообщения в Kafka через консоль:
 
-![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/light/images/7.jpg)
+```
+echo '{"key": "value", "another_key": 123}' | /opt/kafka/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic test-topic
+```
 
-![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/light/images/7-1.jpg)
+8. #### Проверяем Clickhouse:
+
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/light/images/8.jpg)
+
 

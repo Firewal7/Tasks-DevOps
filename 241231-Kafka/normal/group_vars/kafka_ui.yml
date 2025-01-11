@@ -1,0 +1,8 @@
+#kafka_broker: "84.201.143.28:9092"
+#zookeeper_connect: "84.201.143.28:2181"
+#kafka_topic: "new_topic"
+
+# kafka_broker: "{{ hostvars['kafka01'].ansible_host }}:9092"
+#kafka_topic: "new_topic"
+#kafka_group_name: "clickhouse_group"
+#zookeeper_connect: "{{ hostvars['kafka01'].ansible_host }}:2181"

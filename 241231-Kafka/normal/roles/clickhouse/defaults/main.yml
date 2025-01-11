@@ -1,0 +1,4 @@
+---
+kafka_group_name: "clickhouse_group"
+kafka_topic: "test-topic"
+kafka_broker_list: "{{ hostvars['kafka01'].ansible_host }}:9092"

@@ -1,0 +1,11 @@
+<yandex>
+  <logger>
+    <level>{{ log_level | default('info') }}</level>
+  </logger>
+  <profiles>
+    <default>
+      <max_memory_usage>{{ max_memory_usage | default(10000000000) }}</max_memory_usage>
+      <max_threads>{{ max_threads | default(8) }}</max_threads>
+    </default>
+  </profiles>
+</yandex>

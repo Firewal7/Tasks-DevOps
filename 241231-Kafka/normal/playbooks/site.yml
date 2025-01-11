@@ -1,0 +1,18 @@
+---
+- name: Setup Kafka
+  hosts: kafka01
+  become: yes
+  roles:
+    - kafka
+
+- name: Setup Kafka UI
+  hosts: web01
+  become: yes
+  roles:
+    - kafka_ui
+
+- name: Setup ClickHouse
+  hosts: db01
+  become: yes
+  roles:
+    - clickhouse

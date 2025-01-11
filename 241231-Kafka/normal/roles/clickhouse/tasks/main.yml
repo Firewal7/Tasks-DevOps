@@ -1,0 +1,104 @@
+---
+# roles/clickhouse/tasks/main.yml
+
+- name: Установить необходимые пакеты
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - dirmngr
+    state: present
+
+- name: Download ClickHouse GPG key
+  ansible.builtin.get_url:
+    url: "https://packages.clickhouse.com/rpm/lts/repodata/repomd.xml.key"
+    dest: "/tmp/clickhouse-key.gpg"
+
+- name: Add ClickHouse GPG key to keyring
+  ansible.builtin.command:
+    cmd: gpg --dearmor -o /usr/share/keyrings/clickhouse-keyring.gpg /tmp/clickhouse-key.gpg
+  args:
+    creates: /usr/share/keyrings/clickhouse-keyring.gpg
+
+- name: Clean up temporary GPG key file
+  ansible.builtin.file:
+    path: /tmp/clickhouse-key.gpg
+    state: absent
+
+- name: Добавить репозиторий ClickHouse
+  ansible.builtin.command:
+    cmd: echo "deb [signed-by=/usr/share/keyrings/clickhouse-keyring.gpg] https://packages.clickhouse.com/deb stable main" > /etc/apt/sources.list.d/clickhouse.list
+  args:
+    creates: /etc/apt/sources.list.d/clickhouse.list
+
+- name: Установить ClickHouse
+  apt:
+    name:
+      - clickhouse-server
+      - clickhouse-client
+    state: present
+
+- name: Создать директорию для кастомных конфигураций
+  file:
+    path: "/etc/clickhouse-server/config.d"
+    state: directory
+    owner: clickhouse
+    group: clickhouse
+
+- name: Создать кастомный конфигурационный файл
+  template:
+    src: "custom_config.xml.j2"
+    dest: "/etc/clickhouse-server/config.d/custom_config.xml"
+    owner: clickhouse
+    group: clickhouse
+
+- name: Создать базу данных kafka_data
+  shell: |
+    clickhouse-client --host 127.0.0.1 --port 9000 --user default --password '' --query "
+      CREATE DATABASE IF NOT EXISTS kafka_data;
+    "
+  args:
+    executable: /bin/bash
+
+- name: Создать таблицу kafka_messages
+  shell: |
+    clickhouse-client --host 127.0.0.1 --port 9000 --user default --password '' --query "
+      CREATE TABLE IF NOT EXISTS kafka_data.kafka_messages (
+          key String,
+          value String,
+          timestamp DateTime
+      ) ENGINE = MergeTree()
+      ORDER BY timestamp;
+    "
+  args:
+    executable: /bin/bash
+
+- name: Создать таблицу kafka_raw для чтения данных из Kafka
+  shell: |
+    clickhouse-client --host 127.0.0.1 --port 9000 --user default --password '' --query "
+      CREATE TABLE IF NOT EXISTS kafka_data.kafka_raw (
+          key String,
+          value String,
+          timestamp DateTime
+      ) ENGINE = Kafka
+      SETTINGS kafka_broker_list = '158.160.16.246',
+               kafka_topic_list = 'test-topic',
+               kafka_group_name = 'clickhouse_group',
+               kafka_format = 'JSONEachRow',
+               kafka_num_consumers = 1;"
+  args:
+    executable: /bin/bash
+
+- name: Создать материализованное представление kafka_to_table
+  shell: |
+    clickhouse-client --host 127.0.0.1 --port 9000 --user default --password '' --query "
+      CREATE MATERIALIZED VIEW IF NOT EXISTS kafka_data.kafka_to_table
+      TO kafka_data.kafka_messages
+      AS SELECT
+          key,
+          value,
+          now() AS timestamp
+      FROM kafka_data.kafka_raw;
+    "
+  args:
+    executable: /bin/bash
