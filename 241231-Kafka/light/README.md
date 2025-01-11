@@ -114,7 +114,7 @@ CREATE TABLE kafka_data.kafka_raw (
     value String,
     timestamp DateTime
 ) ENGINE = Kafka
-SETTINGS kafka_broker_list = '158.160.3.109:9092',
+SETTINGS kafka_broker_list = '158.160.69.2:9092',
          kafka_topic_list = 'test-topic',
          kafka_group_name = 'clickhouse_group',
          kafka_format = 'JSONEachRow',
