@@ -142,6 +142,16 @@ echo '{"key": "value", "another_key": 123}' | /opt/kafka/bin/kafka-console-produ
 ![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/light/images/7.jpg)
 
 #### Проверяем Clickhouse:
+```
+SELECT 
+    database,
+    table,
+    sum(bytes_on_disk) / 1024 / 1024 AS size_mb
+FROM system.parts
+WHERE active
+GROUP BY database, table
+ORDER BY size_mb DESC;
+```
 
 ![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/light/images/8.jpg)
 
