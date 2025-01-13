@@ -16,5 +16,12 @@ FROM system.parts p
 LEFT JOIN system.processes pr ON pr.database = 'kafka_data'
 WHERE p.database = 'kafka_data';
 
-
 bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic test-topic --partitions 1 --replication-factor 1
+
+export ANSIBLE_CONFIG=/home/msi/devops/241231-Kafka/normal/ansible.cfg
+ansible-playbook /home/msi/devops/241231-Kafka/normal/playbooks/site.yml
+
+    env:
+      KAFKA_CLUSTERS_0_NAME: "local"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "{{ hostvars['kafka01'].ansible_host }}:9092"
+      KAFKA_CLUSTERS_0_ZOOKEEPER: "{{ hostvars['kafka01'].ansible_host }}:2181"

@@ -1,15 +1,19 @@
-# Default variables for ClickHouse
-clickhouse_repo_url: "https://packages.clickhouse.com/deb"
-clickhouse_gpg_key_url: "https://packages.clickhouse.com/rpm/lts/repodata/repomd.xml.key"
-clickhouse_keyring_path: "/usr/share/keyrings/clickhouse-keyring.gpg"
-clickhouse_packages:
-  - clickhouse-server
-  - clickhouse-client
-clickhouse_service_name: "clickhouse-server"
-clickhouse_http_port: 8123
-clickhouse_tcp_port: 9000
-log_level: "info"
-max_memory_usage: 10000000000
-max_threads: 8
+---
+# clickhouse/vars.yml
+
+# Настройки ClickHouse
+clickhouse_version: "24.12.2.29"
+clickhouse_user: "default"
+clickhouse_password: ""
+clickhouse_host: "127.0.0.1"
+clickhouse_port: 9000
+
+# Kafka настройки
+kafka_broker_list: "{{ hostvars['kafka01'].ansible_host }}:9092"
+kafka_topic: "test-topic"
 kafka_group_name: "clickhouse_group"
-create_kafka_tables: true
+
+# Дополнительные настройки
+kafka_format: "JSONEachRow"
+kafka_row_delimiter: "\n"
+kafka_num_consumers: 1

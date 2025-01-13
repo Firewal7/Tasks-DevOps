@@ -10,9 +10,17 @@
     name: openjdk-11-jdk
     state: present
 
+- name: Debug kafka_version
+  debug:
+    var: kafka_version
+
+- name: Debug kafka_ui_external_port
+  debug:
+    var: kafka_scala_version
+
 - name: Скачать Kafka
   get_url:
-    url: "https://dlcdn.apache.org/kafka/3.9.0/kafka_2.13-3.9.0.tgz"
+    url: "https://dlcdn.apache.org/kafka/{{ kafka_version }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
     dest: "/tmp/kafka.tgz"
 
 - name: Распаковать Kafka
@@ -22,8 +30,8 @@
     remote_src: yes
 
 - name: Переименовать директорию Kafka
-  command:
-    cmd: "mv /opt/kafka_2.13-3.9.0 /opt/kafka"
+  ansible.builtin.command:
+    cmd: "mv /opt/kafka_{{ kafka_scala_version }}-{{ kafka_version }} /opt/kafka"
     creates: "/opt/kafka"
 
 - name: Настроить Kafka (server.properties)
@@ -38,11 +46,16 @@
     - { key: "listeners", value: "PLAINTEXT://:9092" }
 
 - name: Запустить ZooKeeper
-  shell: "/opt/kafka/bin/zookeeper-server-start.sh /opt/kafka/config/zookeeper.properties &"
+  ansible.builtin.shell: "/opt/kafka/bin/zookeeper-server-start.sh /opt/kafka/config/zookeeper.properties &"
   args:
     executable: /bin/bash
 
 - name: Запустить Kafka
-  shell: "/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties &"
+  ansible.builtin.shell: "/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties &"
+  args:
+    executable: /bin/bash
+
+- name: Создаём топик
+  ansible.builtin.shell: "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic test-topic --partitions 1 --replication-factor 1"
   args:
     executable: /bin/bash

@@ -1,0 +1,4 @@
+---
+# kafka/vars.yml
+kafka_version: "3.9.0"
+kafka_scala_version: "2.13"

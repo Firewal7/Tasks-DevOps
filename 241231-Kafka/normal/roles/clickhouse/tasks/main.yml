@@ -7,36 +7,34 @@
       - apt-transport-https
       - ca-certificates
       - dirmngr
+      - gnupg
+      - curl
     state: present
 
-- name: Download ClickHouse GPG key
-  ansible.builtin.get_url:
-    url: "https://packages.clickhouse.com/rpm/lts/repodata/repomd.xml.key"
-    dest: "/tmp/clickhouse-key.gpg"
-
-- name: Add ClickHouse GPG key to keyring
-  ansible.builtin.command:
-    cmd: gpg --dearmor -o /usr/share/keyrings/clickhouse-keyring.gpg /tmp/clickhouse-key.gpg
+- name: Download and add ClickHouse GPG key
+  ansible.builtin.shell: |
+    curl -fsSL 'https://packages.clickhouse.com/rpm/lts/repodata/repomd.xml.key' | gpg --dearmor -o /usr/share/keyrings/clickhouse-keyring.gpg
   args:
     creates: /usr/share/keyrings/clickhouse-keyring.gpg
 
-- name: Clean up temporary GPG key file
-  ansible.builtin.file:
-    path: /tmp/clickhouse-key.gpg
-    state: absent
-
-- name: Добавить репозиторий ClickHouse
-  ansible.builtin.command:
-    cmd: echo "deb [signed-by=/usr/share/keyrings/clickhouse-keyring.gpg] https://packages.clickhouse.com/deb stable main" > /etc/apt/sources.list.d/clickhouse.list
+- name: Add ClickHouse repository to sources list
+  ansible.builtin.shell: |
+    echo "deb [signed-by=/usr/share/keyrings/clickhouse-keyring.gpg] https://packages.clickhouse.com/deb stable main" | tee /etc/apt/sources.list.d/clickhouse.list
   args:
     creates: /etc/apt/sources.list.d/clickhouse.list
 
 - name: Установить ClickHouse
   apt:
     name:
-      - clickhouse-server
-      - clickhouse-client
+      - "clickhouse-server={{ clickhouse_version }}"
+      - "clickhouse-client={{ clickhouse_version }}"
     state: present
+
+- name: Запустить сервис ClickHouse
+  ansible.builtin.systemd:
+    name: clickhouse-server
+    state: started
+    enabled: yes
 
 - name: Создать директорию для кастомных конфигураций
   file:
@@ -54,7 +52,7 @@
 
 - name: Создать базу данных kafka_data
   shell: |
-    clickhouse-client --host 127.0.0.1 --port 9000 --user default --password '' --query "
+    clickhouse-client --host {{ clickhouse_host }} --port {{ clickhouse_port }} --user default --password '' --query "
       CREATE DATABASE IF NOT EXISTS kafka_data;
     "
   args:
@@ -62,7 +60,7 @@
 
 - name: Создать таблицу kafka_messages
   shell: |
-    clickhouse-client --host 127.0.0.1 --port 9000 --user default --password '' --query "
+    clickhouse-client --host {{ clickhouse_host }} --port {{ clickhouse_port }} --user default --password '' --query "
       CREATE TABLE IF NOT EXISTS kafka_data.kafka_messages (
           key String,
           value String,
@@ -75,15 +73,15 @@
 
 - name: Создать таблицу kafka_raw для чтения данных из Kafka
   shell: |
-    clickhouse-client --host 127.0.0.1 --port 9000 --user default --password '' --query "
+    clickhouse-client --host {{ clickhouse_host }} --port {{ clickhouse_port }} --user default --password '' --query "
       CREATE TABLE IF NOT EXISTS kafka_data.kafka_raw (
           key String,
           value String,
           timestamp DateTime
       ) ENGINE = Kafka
-      SETTINGS kafka_broker_list = '158.160.16.246',
-               kafka_topic_list = 'test-topic',
-               kafka_group_name = 'clickhouse_group',
+      SETTINGS kafka_broker_list = '{{ kafka_broker_list }}',
+               kafka_topic_list = '{{ kafka_topic }}',
+               kafka_group_name = '{{ kafka_group_name }}',
                kafka_format = 'JSONEachRow',
                kafka_num_consumers = 1;"
   args:
@@ -91,7 +89,7 @@
 
 - name: Создать материализованное представление kafka_to_table
   shell: |
-    clickhouse-client --host 127.0.0.1 --port 9000 --user default --password '' --query "
+    clickhouse-client --host {{ clickhouse_host }} --port {{ clickhouse_port }} --user default --password '' --query "
       CREATE MATERIALIZED VIEW IF NOT EXISTS kafka_data.kafka_to_table
       TO kafka_data.kafka_messages
       AS SELECT

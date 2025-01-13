@@ -17,8 +17,10 @@
     state: started
     restart_policy: always
     ports:
-      - "8080:8080"
+      - "{{ kafka_ui_external_port }}:{{ kafka_ui_internal_port }}"
     env:
-      KAFKA_CLUSTERS_0_NAME: "local"
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "{{ hostvars['kafka01'].ansible_host }}:9092"
-      KAFKA_CLUSTERS_0_ZOOKEEPER: "{{ hostvars['kafka01'].ansible_host }}:2181"
+      KAFKA_CLUSTERS_0_NAME: "{{ kafka_cluster_name }}"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "{{ kafka_bootstrap_servers }}"
+      KAFKA_CLUSTERS_0_ZOOKEEPER: "{{ kafka_zookeeper }}"
+
+     
