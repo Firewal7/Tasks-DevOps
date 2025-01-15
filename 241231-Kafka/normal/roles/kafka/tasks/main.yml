@@ -1,30 +1,19 @@
----
-# roles/kafka/tasks/main.yml
-
 - name: Обновить список пакетов
-  apt:
+  ansible.builtin.apt:
     update_cache: yes
 
 - name: Установить Java
-  apt:
+  ansible.builtin.apt:
     name: openjdk-11-jdk
     state: present
 
-- name: Debug kafka_version
-  debug:
-    var: kafka_version
-
-- name: Debug kafka_ui_external_port
-  debug:
-    var: kafka_scala_version
-
 - name: Скачать Kafka
-  get_url:
+  ansible.builtin.get_url:
     url: "https://dlcdn.apache.org/kafka/{{ kafka_version }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
     dest: "/tmp/kafka.tgz"
 
 - name: Распаковать Kafka
-  unarchive:
+  ansible.builtin.unarchive:
     src: "/tmp/kafka.tgz"
     dest: "/opt/"
     remote_src: yes
@@ -35,15 +24,11 @@
     creates: "/opt/kafka"
 
 - name: Настроить Kafka (server.properties)
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "/opt/kafka/config/server.properties"
     regexp: "^{{ item.key }}=.*"
     line: "{{ item.key }}={{ item.value }}"
-  loop:
-    - { key: "broker.id", value: "1" }
-    - { key: "log.dirs", value: "/tmp/kafka-logs" }
-    - { key: "zookeeper.connect", value: "localhost:2181" }
-    - { key: "listeners", value: "PLAINTEXT://:9092" }
+  loop: "{{ kafka_server_properties }}"
 
 - name: Запустить ZooKeeper
   ansible.builtin.shell: "/opt/kafka/bin/zookeeper-server-start.sh /opt/kafka/config/zookeeper.properties &"
@@ -55,7 +40,12 @@
   args:
     executable: /bin/bash
 
-- name: Создаём топик
-  ansible.builtin.shell: "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic test-topic --partitions 1 --replication-factor 1"
+- name: Проверить существование топика
+  ansible.builtin.command: "/opt/kafka/bin/kafka-topics.sh --bootstrap-server {{ kafka_bootstrap_server }} --list"
+  register: kafka_topics
+
+- name: Создать топик, если он не существует
+  ansible.builtin.shell: "/opt/kafka/bin/kafka-topics.sh --bootstrap-server {{ kafka_bootstrap_server }} --create --topic {{ kafka_topic_name }} --partitions {{ kafka_topic_partitions }} --replication-factor {{ kafka_topic_replication_factor }}"
   args:
     executable: /bin/bash
+  when: kafka_topic_name not in kafka_topics.stdout_lines

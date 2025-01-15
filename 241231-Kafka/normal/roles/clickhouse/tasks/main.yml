@@ -1,8 +1,12 @@
 ---
 # roles/clickhouse/tasks/main.yml
 
-- name: Установить необходимые пакеты
-  apt:
+- name: Обновляем кэш пакетов apt
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Устанавливаем необходимые пакеты
+  ansible.builtin.apt:
     name:
       - apt-transport-https
       - ca-certificates
@@ -23,80 +27,34 @@
   args:
     creates: /etc/apt/sources.list.d/clickhouse.list
 
-- name: Установить ClickHouse
-  apt:
+- name: Обновляем кэш пакетов после добавления пакетов
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Устанавливаем ClickHouse
+  ansible.builtin.apt:
     name:
       - "clickhouse-server={{ clickhouse_version }}"
       - "clickhouse-client={{ clickhouse_version }}"
+      - "clickhouse-common-static={{ clickhouse_version }}"
     state: present
 
-- name: Запустить сервис ClickHouse
+- name: Запускаем и включаем ClickHouse
   ansible.builtin.systemd:
     name: clickhouse-server
     state: started
     enabled: yes
 
-- name: Создать директорию для кастомных конфигураций
-  file:
-    path: "/etc/clickhouse-server/config.d"
-    state: directory
-    owner: clickhouse
-    group: clickhouse
+- name: Применяем SQL-шаблон для настройки ClickHouse
+  ansible.builtin.template:
+    src: "database.xml.j2"
+    dest: "/tmp/database.xml"
+  notify:
+    - Выполнить настройку ClickHouse
 
-- name: Создать кастомный конфигурационный файл
-  template:
-    src: "custom_config.xml.j2"
-    dest: "/etc/clickhouse-server/config.d/custom_config.xml"
-    owner: clickhouse
-    group: clickhouse
-
-- name: Создать базу данных kafka_data
-  shell: |
-    clickhouse-client --host {{ clickhouse_host }} --port {{ clickhouse_port }} --user default --password '' --query "
-      CREATE DATABASE IF NOT EXISTS kafka_data;
-    "
+- name: Выполняем настройку ClickHouse
+  ansible.builtin.shell: |
+    cat /tmp/database.xml | clickhouse-client --host {{ clickhouse_host }} --port {{ clickhouse_port }} --user {{ clickhouse_user }} --password '{{ clickhouse_password }}' --multiquery
   args:
     executable: /bin/bash
-
-- name: Создать таблицу kafka_messages
-  shell: |
-    clickhouse-client --host {{ clickhouse_host }} --port {{ clickhouse_port }} --user default --password '' --query "
-      CREATE TABLE IF NOT EXISTS kafka_data.kafka_messages (
-          key String,
-          value String,
-          timestamp DateTime
-      ) ENGINE = MergeTree()
-      ORDER BY timestamp;
-    "
-  args:
-    executable: /bin/bash
-
-- name: Создать таблицу kafka_raw для чтения данных из Kafka
-  shell: |
-    clickhouse-client --host {{ clickhouse_host }} --port {{ clickhouse_port }} --user default --password '' --query "
-      CREATE TABLE IF NOT EXISTS kafka_data.kafka_raw (
-          key String,
-          value String,
-          timestamp DateTime
-      ) ENGINE = Kafka
-      SETTINGS kafka_broker_list = '{{ kafka_broker_list }}',
-               kafka_topic_list = '{{ kafka_topic }}',
-               kafka_group_name = '{{ kafka_group_name }}',
-               kafka_format = 'JSONEachRow',
-               kafka_num_consumers = 1;"
-  args:
-    executable: /bin/bash
-
-- name: Создать материализованное представление kafka_to_table
-  shell: |
-    clickhouse-client --host {{ clickhouse_host }} --port {{ clickhouse_port }} --user default --password '' --query "
-      CREATE MATERIALIZED VIEW IF NOT EXISTS kafka_data.kafka_to_table
-      TO kafka_data.kafka_messages
-      AS SELECT
-          key,
-          value,
-          now() AS timestamp
-      FROM kafka_data.kafka_raw;
-    "
-  args:
-    executable: /bin/bash
+  when: clickhouse_user is defined and clickhouse_password is defined

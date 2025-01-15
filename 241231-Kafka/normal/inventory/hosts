@@ -1,25 +1,21 @@
 ---
+all:
+  vars:
+    ansible_user: user
+    ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+    ansible_ssh_common_args: "-i /root/.ssh/id.rsa"
+
 kafka:
   hosts:
-     kafka01:
-      ansible_host: 51.250.105.47
-      ansible_user: user
-      ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
-      ansible_ssh_common_args: "-i /root/.ssh/id.rsa"
+    kafka01:
+      ansible_host: 89.169.166.108
 
 kafka_ui:
   hosts:
     web01:
-      ansible_host: 51.250.106.20
-      ansible_user: user
-      ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
-      ansible_ssh_common_args: "-i /root/.ssh/id.rsa"
+      ansible_host: 158.160.21.3
 
 clickhouse:
   hosts:
     db01:
-      ansible_host: 130.193.42.13
-      ansible_user: user
-      ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
-      ansible_ssh_common_args: "-i /root/.ssh/id.rsa"
-      
+      ansible_host: 158.160.21.3

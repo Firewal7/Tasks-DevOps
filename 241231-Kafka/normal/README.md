@@ -9,14 +9,15 @@
 
 clickhouse-client --host 127.0.0.1 --port 9000 --user default --password '' --database default
 
-SELECT 
-    round(sum(p.bytes) / 1024 / 1024, 2) AS total_mb,
-    count(pr.query_id) AS active_queries
-FROM system.parts p
-LEFT JOIN system.processes pr ON pr.database = 'kafka_data'
-WHERE p.database = 'kafka_data';
+SELECT database, table, SUM(bytes_on_disk) / 1024 / 1024 AS size_mb
+FROM system.parts
+WHERE active
+GROUP BY database, table
+ORDER BY size_mb DESC;
+
 
 bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic test-topic --partitions 1 --replication-factor 1
+echo '{"key": "value", "another_key": 123}' | /opt/kafka/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic test-topic
 
 export ANSIBLE_CONFIG=/home/msi/devops/241231-Kafka/normal/ansible.cfg
 ansible-playbook /home/msi/devops/241231-Kafka/normal/playbooks/site.yml

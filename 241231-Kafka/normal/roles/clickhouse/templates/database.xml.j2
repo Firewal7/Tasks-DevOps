@@ -1,0 +1,31 @@
+-- Создание базы данных
+CREATE DATABASE IF NOT EXISTS {{ clickhouse_database }};
+
+-- Создание таблицы для сообщений
+CREATE TABLE IF NOT EXISTS {{ clickhouse_database }}.kafka_messages (
+    key String,
+    value String,
+    timestamp DateTime
+) ENGINE = MergeTree()
+ORDER BY timestamp;
+
+-- Создание таблицы для чтения данных из Kafka
+CREATE TABLE IF NOT EXISTS {{ clickhouse_database }}.kafka_raw (
+    key String,
+    value String,
+    timestamp DateTime
+) ENGINE = Kafka
+SETTINGS kafka_broker_list = '{{ kafka_broker_list }}',
+         kafka_topic_list = '{{ kafka_topic }}',
+         kafka_group_name = '{{ kafka_group_name }}',
+         kafka_format = '{{ kafka_format }}',
+         kafka_num_consumers = {{ kafka_num_consumers }};
+
+-- Создание материализованного представления
+CREATE MATERIALIZED VIEW IF NOT EXISTS {{ clickhouse_database }}.kafka_to_table
+TO {{ clickhouse_database }}.kafka_messages
+AS SELECT
+    key,
+    value,
+    now() AS timestamp
+FROM {{ clickhouse_database }}.kafka_raw;
