@@ -9,7 +9,6 @@ clickhouse_port: 9000
 
 clickhouse_database: "kafka_data"
 
-
 # Подключение Kafka к БД
 kafka_broker_list: "{{ hostvars['kafka01'].ansible_host }}:9092"
 kafka_topic: "test-topic"

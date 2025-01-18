@@ -49,8 +49,6 @@
   ansible.builtin.template:
     src: "database.xml.j2"
     dest: "/tmp/database.xml"
-  notify:
-    - Выполнить настройку ClickHouse
 
 - name: Выполняем настройку ClickHouse
   ansible.builtin.shell: |
