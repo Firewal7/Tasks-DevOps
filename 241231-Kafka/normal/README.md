@@ -1,10 +1,50 @@
 # Уровень Normal:
 
+0. Развернул виртуальные машины с linux: kafka01, db01, web01 с помощью Terraform. 
 1. Создайте Ansible-роль для установки Kafka UI и настройте подключение к серверу Kafka.
 2. Создайте Ansible-роль для установки Apache Kafka
 3. Создайте Ansible-роль для установки и настройки ClickHouse. Учтите возможность кастомизации конфигурации базы данных.
 4. Напишите плейбук, объединяющий роли, для автомаической настройки всех компонентов.
 5. Доработайте роль Kafka, либо напишите новую, для настройки кластера Kafka (например для 3 брокеров)
+
+# Решение:
+
+0. Развернул виртуальные машины с помощью Terraform.
+
+```
+terraform apply
+```
+
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/nornal/images/.jpg)
+
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/normal/images/.jpg)
+
+1. Создал Ansible-роль для установки Kafka UI и настроил подключение к серверу Kafka.
+
+- [Ansible-роль Kafka UI](https://github.com/Firewal7/Tasks-DevOps/tree/main/241231-Kafka/normal)
+
+2. Создал Ansible-роль для установки Apache Kafka.
+
+- [Ansible-роль Apache Kafka](https://github.com/Firewal7/Tasks-DevOps/tree/main/241231-Kafka/normal)
+
+3. Создал Ansible-роль для установки и настройки ClickHouse. Учёл возможность кастомизации конфигурации базы данных через group_vars.
+
+- [Ansible-роль ClickHouse](https://github.com/Firewal7/Tasks-DevOps/tree/main/241231-Kafka/normal)
+
+4. Написал плейбук, объединяющий роли, для автомаической настройки всех компонентов.
+
+- [Playbook](https://github.com/Firewal7/Tasks-DevOps/tree/main/241231-Kafka/normal)
+
+5. Доработайте роль Kafka, либо напишите новую, для настройки кластера Kafka (например для 3 брокеров)
+
+
+
+
+
+
+
+
+
 
 
 clickhouse-client --host 127.0.0.1 --port 9000 --user default --password '' --database default

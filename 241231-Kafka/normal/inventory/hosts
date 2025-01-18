@@ -1,21 +1,20 @@
----
 all:
   vars:
-    ansible_user: user
-    ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+    ansible_user: ubuntu
     ansible_ssh_common_args: "-i /root/.ssh/id.rsa"
+    ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
 
 kafka:
   hosts:
     kafka01:
-      ansible_host: 51.250.28.129
+      ansible_host: 89.169.154.156
 
 kafka_ui:
   hosts:
     web01:
-      ansible_host: 51.250.108.108
+      ansible_host: 89.169.160.161
 
 clickhouse:
   hosts:
     db01:
-      ansible_host: 89.169.162.52
+      ansible_host: 158.160.148.31
