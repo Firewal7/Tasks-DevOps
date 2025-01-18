@@ -1,0 +1,15 @@
+# Terraform state files
+*.tfstate
+*.tfstate.backup
+*.lock.hcl
+# .terraform directories
+.terraform/
+# Terraform variable files (contains sensitive data)
+*.tfvars
+*.tfvars.json
+# SSH keys and private certificates
+*.pem
+*.key
+
+# Log files
+*.log
