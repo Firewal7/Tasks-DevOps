@@ -53,4 +53,4 @@ ansible-playbook playbook.yml
 
 #### Проверяем Clickhouse:
 
-![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/normal/images/5.jpg)
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/normal/images/6.jpg)
