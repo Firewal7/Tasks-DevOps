@@ -1,13 +1,24 @@
-# group_var/kafka.yml
+# group_vars/kafka.yml
+
 kafka_version: "3.9.0"
 kafka_scala_version: "2.13"
 
 kafka_bootstrap_server: "localhost:9092"
 kafka_topic_name: "test-topic"
-kafka_topic_partitions: 1
-kafka_topic_replication_factor: 1
+kafka_topic_partitions: 3
+kafka_topic_replication_factor: 3
+
 kafka_server_properties:
-  - { key: "broker.id", value: "1" }
-  - { key: "log.dirs", value: "/tmp/kafka-logs" }
   - { key: "zookeeper.connect", value: "localhost:2181" }
-  - { key: "listeners", value: "PLAINTEXT://:9092" }
+
+# Список брокеров с параметрами для каждого
+kafka_brokers:
+  - id: 1
+    port: 9092
+    log_dir: "/tmp/kafka-logs-1"
+  - id: 2
+    port: 9093
+    log_dir: "/tmp/kafka-logs-2"
+  - id: 3
+    port: 9094
+    log_dir: "/tmp/kafka-logs-3"

@@ -7,14 +7,14 @@ all:
 kafka:
   hosts:
     kafka01:
-      ansible_host: 89.169.154.156
+      ansible_host: 158.160.60.250
 
 kafka_ui:
   hosts:
     web01:
-      ansible_host: 89.169.160.161
+      ansible_host: 158.160.71.23
 
 clickhouse:
   hosts:
     db01:
-      ansible_host: 158.160.148.31
+      ansible_host: 84.252.132.32

@@ -15,13 +15,13 @@
       - curl
     state: present
 
-- name: Download and add ClickHouse GPG key
+- name: Скачиваем и добавляем ключ ClickHouse GPG
   ansible.builtin.shell: |
     curl -fsSL 'https://packages.clickhouse.com/rpm/lts/repodata/repomd.xml.key' | gpg --dearmor -o /usr/share/keyrings/clickhouse-keyring.gpg
   args:
     creates: /usr/share/keyrings/clickhouse-keyring.gpg
 
-- name: Add ClickHouse repository to sources list
+- name: Добавляем репозиторий ClickHouse в список источников
   ansible.builtin.shell: |
     echo "deb [signed-by=/usr/share/keyrings/clickhouse-keyring.gpg] https://packages.clickhouse.com/deb stable main" | tee /etc/apt/sources.list.d/clickhouse.list
   args:

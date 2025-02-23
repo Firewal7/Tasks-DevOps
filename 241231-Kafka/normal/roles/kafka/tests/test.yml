@@ -2,4 +2,4 @@
 - hosts: localhost
   remote_user: root
   roles:
-    - roles/kafka
+    - kafka_3brokers

@@ -1,11 +1,11 @@
 ---
 # roles/kafka_ui/tasks/main.yml
 
-- name: Обновить список пакетов
+- name: Обновляем список пакетов
   ansible.builtin.apt:
     update_cache: yes
 
-- name: Install Docker
+- name: Устанавливаем Docker
   ansible.builtin.apt:
     name: docker.io
     state: present

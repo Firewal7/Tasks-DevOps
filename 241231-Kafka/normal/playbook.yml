@@ -1,4 +1,5 @@
 ---
+
 - name: Setup Kafka
   hosts: kafka01
   become: yes

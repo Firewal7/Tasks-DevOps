@@ -15,54 +15,42 @@
 terraform apply
 ```
 
-![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/nornal/images/.jpg)
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/normal/images/1.jpg)
 
-![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/normal/images/.jpg)
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/normal/images/2.jpg)
 
 1. Создал Ansible-роль для установки Kafka UI и настроил подключение к серверу Kafka.
 
-- [Ansible-роль Kafka UI](https://github.com/Firewal7/Tasks-DevOps/tree/main/241231-Kafka/normal)
+- [Ansible-роль Kafka UI](https://github.com/Firewal7/Tasks-DevOps/tree/main/241231-Kafka/normal/roles/kafka_ui)
 
 2. Создал Ansible-роль для установки Apache Kafka.
 
-- [Ansible-роль Apache Kafka](https://github.com/Firewal7/Tasks-DevOps/tree/main/241231-Kafka/normal)
+- [Ansible-роль Apache Kafka](https://github.com/Firewal7/Tasks-DevOps/tree/main/241231-Kafka/normal/roles/kafka)
 
 3. Создал Ansible-роль для установки и настройки ClickHouse. Учёл возможность кастомизации конфигурации базы данных через group_vars.
 
-- [Ansible-роль ClickHouse](https://github.com/Firewal7/Tasks-DevOps/tree/main/241231-Kafka/normal)
+- [Ansible-роль ClickHouse](https://github.com/Firewal7/Tasks-DevOps/tree/main/241231-Kafka/normal/roles/clickhouse)
 
 4. Написал плейбук, объединяющий роли, для автомаической настройки всех компонентов.
 
-- [Playbook](https://github.com/Firewal7/Tasks-DevOps/tree/main/241231-Kafka/normal)
+- [Playbook](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/normal/playbook.yml)
 
-5. Доработайте роль Kafka, либо напишите новую, для настройки кластера Kafka (например для 3 брокеров)
+5. Доработал роль Kafka, либо напишите новую, для настройки кластера Kafka (например для 3 брокеров)
 
+- [Ansible-роль Apache Kafka](https://github.com/Firewal7/Tasks-DevOps/tree/main/241231-Kafka/normal/roles/kafka)
 
+```
+ansible-playbook playbook.yml
+```
 
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/normal/images/3.jpg)
 
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/normal/images/4.jpg)
 
+#### Отправка сообщения в Kafka:
 
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/normal/images/5.jpg)
 
+#### Проверяем Clickhouse:
 
-
-
-
-clickhouse-client --host 127.0.0.1 --port 9000 --user default --password '' --database default
-
-SELECT database, table, SUM(bytes_on_disk) / 1024 / 1024 AS size_mb
-FROM system.parts
-WHERE active
-GROUP BY database, table
-ORDER BY size_mb DESC;
-
-
-bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic test-topic --partitions 1 --replication-factor 1
-echo '{"key": "value", "another_key": 123}' | /opt/kafka/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic test-topic
-
-export ANSIBLE_CONFIG=/home/msi/devops/241231-Kafka/normal/ansible.cfg
-ansible-playbook /home/msi/devops/241231-Kafka/normal/playbooks/site.yml
-
-    env:
-      KAFKA_CLUSTERS_0_NAME: "local"
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "{{ hostvars['kafka01'].ansible_host }}:9092"
-      KAFKA_CLUSTERS_0_ZOOKEEPER: "{{ hostvars['kafka01'].ansible_host }}:2181"
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/normal/images/5.jpg)

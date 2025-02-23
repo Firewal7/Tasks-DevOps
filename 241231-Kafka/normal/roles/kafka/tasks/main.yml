@@ -1,50 +1,53 @@
-- name: Обновить список пакетов
+---
+# roles/kafka/tasks/main.yml
+
+- name: Обновляем список пакетов
   ansible.builtin.apt:
     update_cache: yes
 
-- name: Установить Java
+- name: Устанавливаем Java
   ansible.builtin.apt:
     name: openjdk-11-jdk
     state: present
 
-- name: Скачать Kafka
+- name: Скачиваем Kafka
   ansible.builtin.get_url:
     url: "https://dlcdn.apache.org/kafka/{{ kafka_version }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
     dest: "/tmp/kafka.tgz"
 
-- name: Распаковать Kafka
+- name: Распаковываем Kafka
   ansible.builtin.unarchive:
     src: "/tmp/kafka.tgz"
     dest: "/opt/"
     remote_src: yes
 
-- name: Переименовать директорию Kafka
+- name: Переименовываем директорию в Kafka
   ansible.builtin.command:
     cmd: "mv /opt/kafka_{{ kafka_scala_version }}-{{ kafka_version }} /opt/kafka"
     creates: "/opt/kafka"
 
-- name: Настроить Kafka (server.properties)
-  ansible.builtin.lineinfile:
-    path: "/opt/kafka/config/server.properties"
-    regexp: "^{{ item.key }}=.*"
-    line: "{{ item.key }}={{ item.value }}"
-  loop: "{{ kafka_server_properties }}"
+- name: Создаём Kafka файлы конфигурации для каждого брокера
+  ansible.builtin.template:
+    src: server.properties.j2
+    dest: "/opt/kafka/config/server-{{ item.id }}.properties"
+  loop: "{{ kafka_brokers }}"
 
-- name: Запустить ZooKeeper
+- name: Запускаем ZooKeeper
   ansible.builtin.shell: "/opt/kafka/bin/zookeeper-server-start.sh /opt/kafka/config/zookeeper.properties &"
   args:
     executable: /bin/bash
 
-- name: Запустить Kafka
-  ansible.builtin.shell: "/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties &"
+- name: Запускаем Kafka брокеры
+  ansible.builtin.shell: "/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server-{{ item.id }}.properties &"
   args:
     executable: /bin/bash
+  loop: "{{ kafka_brokers }}"
 
-- name: Проверить существование топика
+- name: Проверяем существование топика
   ansible.builtin.command: "/opt/kafka/bin/kafka-topics.sh --bootstrap-server {{ kafka_bootstrap_server }} --list"
   register: kafka_topics
 
-- name: Создать топик, если он не существует
+- name: Создаём топик, если он не существует
   ansible.builtin.shell: "/opt/kafka/bin/kafka-topics.sh --bootstrap-server {{ kafka_bootstrap_server }} --create --topic {{ kafka_topic_name }} --partitions {{ kafka_topic_partitions }} --replication-factor {{ kafka_topic_replication_factor }}"
   args:
     executable: /bin/bash
