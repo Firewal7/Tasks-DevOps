@@ -13,7 +13,7 @@
 
 1. ВМ развернул на Yandex Cloud
 
-![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/light/images/1.jpg)
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/Light/images/1.jpg)
 
 2. Установите Apache Kafka на kafka01.
 
@@ -68,9 +68,9 @@ provectuslabs/kafka-ui:latest
 
 4. Проверяем подключение Kafka UI к Kafka.
 
-![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/light/images/4.jpg)
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/Light/images/4.jpg)
 
-![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/light/images/4.1.jpg)
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/Light/images/4.1.jpg)
 
 5. Установливаем ClickHouse на db01.
 
@@ -139,7 +139,7 @@ FROM kafka_data.kafka_raw;
 echo '{"key": "value", "another_key": 123}' | /opt/kafka/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic test-topic
 ```
 
-![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/light/images/7.jpg)
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/Light/images/7.jpg)
 
 #### Проверяем Clickhouse:
 ```
@@ -153,6 +153,6 @@ GROUP BY database, table
 ORDER BY size_mb DESC;
 ```
 
-![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/light/images/8.jpg)
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/Light/images/8.jpg)
 
 

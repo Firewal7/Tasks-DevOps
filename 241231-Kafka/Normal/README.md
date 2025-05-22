@@ -15,42 +15,42 @@
 terraform apply
 ```
 
-![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/normal/images/1.jpg)
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/Normal/images/1.jpg)
 
-![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/normal/images/2.jpg)
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/Normal/images/2.jpg)
 
 1. Создал Ansible-роль для установки Kafka UI и настроил подключение к серверу Kafka.
 
-- [Ansible-роль Kafka UI](https://github.com/Firewal7/Tasks-DevOps/tree/main/241231-Kafka/normal/roles/kafka_ui)
+- [Ansible-роль Kafka UI](https://github.com/Firewal7/Tasks-DevOps/tree/main/241231-Kafka/Normal/roles/kafka_ui)
 
 2. Создал Ansible-роль для установки Apache Kafka.
 
-- [Ansible-роль Apache Kafka](https://github.com/Firewal7/Tasks-DevOps/tree/main/241231-Kafka/normal/roles/kafka)
+- [Ansible-роль Apache Kafka](https://github.com/Firewal7/Tasks-DevOps/tree/main/241231-Kafka/Normal/roles/kafka)
 
 3. Создал Ansible-роль для установки и настройки ClickHouse. Учёл возможность кастомизации конфигурации базы данных через group_vars.
 
-- [Ansible-роль ClickHouse](https://github.com/Firewal7/Tasks-DevOps/tree/main/241231-Kafka/normal/roles/clickhouse)
+- [Ansible-роль ClickHouse](https://github.com/Firewal7/Tasks-DevOps/tree/main/241231-Kafka/Normal/roles/clickhouse)
 
 4. Написал плейбук, объединяющий роли, для автомаической настройки всех компонентов.
 
-- [Playbook](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/normal/playbook.yml)
+- [Playbook](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/Normal/playbook.yml)
 
 5. Доработал роль Kafka, либо напишите новую, для настройки кластера Kafka (например для 3 брокеров)
 
-- [Ansible-роль Apache Kafka](https://github.com/Firewal7/Tasks-DevOps/tree/main/241231-Kafka/normal/roles/kafka)
+- [Ansible-роль Apache Kafka](https://github.com/Firewal7/Tasks-DevOps/tree/main/241231-Kafka/Normal/roles/kafka)
 
 ```
 ansible-playbook playbook.yml
 ```
 
-![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/normal/images/3.jpg)
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/Normal/images/3.jpg)
 
-![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/normal/images/4.jpg)
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/Normal/images/4.jpg)
 
 #### Отправка сообщения в Kafka:
 
-![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/normal/images/5.jpg)
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/Normal/images/5.jpg)
 
 #### Проверяем Clickhouse:
 
-![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/normal/images/6.jpg)
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/241231-Kafka/Normal/images/6.jpg)
