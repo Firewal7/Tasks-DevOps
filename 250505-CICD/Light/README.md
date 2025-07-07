@@ -11,7 +11,7 @@
 
 1. ВМ развернул на Yandex Cloud
 
-![alt](https://github.com/Firewal7/Tasks-DevOps/tree/main/250505-CICD/Light/images/1.jpg)
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/250505-CICD/Light/images/1.jpg)
 
 2. Устанавливаем Docker и docker-compose на nexus01, запускаем Sonartype Nexus, создаём volume для сохранения данных.
 
@@ -47,7 +47,7 @@ d225d576-10a7-48a3-a84f-5f67d8a9bbf9
 В docker-hosted открываем порт http:5000
 В docker-proxy storage https://registry-1.docker.io (Use Docker Hub)
 
-![alt](https://github.com/Firewal7/Tasks-DevOps/tree/main/250505-CICD/Light/images/2.jpg)
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/250505-CICD/Light/images/2.jpg)
 
 4. docker-compose.yml поднимающий Nexus и postgresql c healtchech'ками.
 
@@ -215,4 +215,4 @@ user@app01:~$ curl http://89.169.189.47:8000
 Hello from app01!
 ```
 
-![alt](https://github.com/Firewal7/Tasks-DevOps/tree/main/250505-CICD/Light/images/3.jpg)
+![alt](https://github.com/Firewal7/Tasks-DevOps/blob/main/250505-CICD/Light/images/3.jpg)
