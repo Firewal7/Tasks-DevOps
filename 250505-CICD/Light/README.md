@@ -27,7 +27,7 @@ docker run -d --name nexus \
   -p 5000:5000 \
   --restart=unless-stopped \
   -v nexus-data:/nexus-data \
-  sonatype/nexus3
+  sonatype/nexus3:3.68.0
 ```
 ```
 user@nexus01:~$ docker ps
@@ -56,7 +56,7 @@ version: "3.9"
 
 services:
   nexus:
-    image: sonatype/nexus3
+    image: sonatype/nexus3:3.68.0
     container_name: nexus
     ports:
       - "8081:8081"
@@ -66,17 +66,17 @@ services:
     restart: unless-stopped
     depends_on:
       postgresql:
-        condition: service_healthy  # Дождаться, пока postgresql станет здоровым
+        condition: service_healthy
     environment:
-      - NEXUS_DB_CONNECTION_STRING=jdbc:postgresql://postgresql:5432/nexus
-      - NEXUS_DB_USERNAME=nexus
-      - NEXUS_DB_PASSWORD=nexus
+      - NEXUS_DB_CONNECTION_STRING=jdbc:postgresql://postgresql:5432/${POSTGRES_DB}
+      - NEXUS_DB_USERNAME=${NEXUS_DB_USER}
+      - NEXUS_DB_PASSWORD=${NEXUS_DB_PASS}
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8081/ || exit 1"]  # Проверка доступности веб-интерфейса
+      test: ["CMD-SHELL", "curl -f http://localhost:8081/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 60s  # Дать время Nexus на запуск
+      start_period: 60s
     networks:
       - nexus-network
 
@@ -87,11 +87,11 @@ services:
       - postgresql-data:/var/lib/postgresql/data
     restart: unless-stopped
     environment:
-      - POSTGRES_USER=nexus
-      - POSTGRES_PASSWORD=nexus
-      - POSTGRES_DB=nexus
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U nexus -d nexus"]  # Проверка готовности postgresql
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -107,6 +107,18 @@ networks:
   nexus-network:
     driver: bridge
 ```
+
+Переменные вынес в .env
+
+```
+# .env
+NEXUS_DB_USER=nexus
+NEXUS_DB_PASS=nexus
+POSTGRES_USER=nexus
+POSTGRES_PASSWORD=nexus
+POSTGRES_DB=nexus
+```
+
 Остановите и удалите существующий контейнер Nexus:
 ```
 docker stop nexus 
