@@ -1,0 +1,1 @@
+Папка для inventory-файла hosts, генерируемого Terraform.
