@@ -1,4 +1,6 @@
 # group_vars/kafka_ui.yml
+
+kafka_ui_image_tag: "v0.7.2"
 kafka_ui_external_port: 8080
 kafka_ui_internal_port: 8080
 kafka_cluster_name: "local"
