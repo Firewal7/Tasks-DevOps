@@ -5,6 +5,7 @@
 
 variable "token" {
   type        = string
+  sensitive = true
   description = "Your Yandex.Cloud API token"
 }
 
@@ -80,11 +81,13 @@ variable "ssh_user" {
 ## Путь к публичному ключу (вынесен в personal.auto.tfvars)
 variable "ssh_public_key_path" {
   type        = string
+  sensitive = true
   description = "Path to the SSH public key"
 }
 
 ## Путь к приватному ключу (вынесен в personal.auto.tfvars)
 variable "ssh_private_key_path" {
   type        = string
+  sensitive = true
   description = "Path to the SSH private key"
 }
