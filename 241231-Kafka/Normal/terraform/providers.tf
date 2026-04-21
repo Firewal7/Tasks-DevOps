@@ -15,7 +15,3 @@ provider "yandex" {
   cloud_id  = var.cloud_id
   folder_id = var.folder_id
 }
-
-data "yandex_compute_image" "public-ubuntu" {
-  image_id = var.public_image
-}
