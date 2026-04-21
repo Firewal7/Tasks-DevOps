@@ -4,5 +4,5 @@ kafka_ui_image_tag: "v0.7.2"
 kafka_ui_external_port: 8080
 kafka_ui_internal_port: 8080
 kafka_cluster_name: "local"
-kafka_bootstrap_servers: "{{ hostvars['kafka01'].ansible_host }}:9092"
-kafka_zookeeper: "{{ hostvars['kafka01'].ansible_host }}:2181"
+kafka_bootstrap_servers: >-
+  {{ hostvars['kafka01'].ansible_host }}:9092,{{ hostvars['kafka01'].ansible_host }}:9094,{{ hostvars['kafka01'].ansible_host }}:9096
