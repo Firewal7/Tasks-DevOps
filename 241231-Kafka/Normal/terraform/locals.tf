@@ -3,21 +3,15 @@
 locals {
   instances = {
     kafka01 = {
-      name       = "kafka01"
-      zone       = var.subnets["central1-a"].zone
-      subnet_id  = yandex_vpc_subnet.subnet["central1-a"].id
+      subnet_key = "central1-a"
       platform   = "standard-v1"
     }
     web01 = {
-      name       = "web01"
-      zone       = var.subnets["central1-b"].zone
-      subnet_id  = yandex_vpc_subnet.subnet["central1-b"].id
+      subnet_key = "central1-b"
       platform   = "standard-v1"
     }
     db01 = {
-      name       = "db01"
-      zone       = var.subnets["central1-d"].zone
-      subnet_id  = yandex_vpc_subnet.subnet["central1-d"].id
+      subnet_key = "central1-d"
       platform   = "standard-v2"
     }
   }
