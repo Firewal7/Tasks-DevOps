@@ -3,9 +3,9 @@
 resource "yandex_compute_instance" "instances" {
   for_each = local.instances
 
-  name        = each.value.name
-  hostname    = each.value.name
-  zone        = each.value.zone
+  name        = each.key
+  hostname    = each.key
+  zone        = var.subnets[each.value.subnet_key].zone
   platform_id = each.value.platform
 
   resources {
@@ -26,7 +26,7 @@ resource "yandex_compute_instance" "instances" {
   }
 
   network_interface {
-    subnet_id = each.value.subnet_id
+    subnet_id = yandex_vpc_subnet.subnet[each.value.subnet_key].id
     nat       = true
   }
 
