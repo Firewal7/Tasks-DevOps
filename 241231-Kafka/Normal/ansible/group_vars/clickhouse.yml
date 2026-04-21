@@ -1,5 +1,4 @@
-# group_vars/clickhouse.yml
-
+---
 # Настройки ClickHouse
 clickhouse_version: "24.12.2.29"
 clickhouse_user: "default"
@@ -10,7 +9,8 @@ clickhouse_port: 9000
 clickhouse_database: "kafka_data"
 
 # Подключение Kafka к БД
-kafka_broker_list: "{{ hostvars['kafka01'].ansible_host }}:9092"
+kafka_broker_list: >-
+  {{ hostvars['kafka01'].ansible_host }}:9092,{{ hostvars['kafka01'].ansible_host }}:9094,{{ hostvars['kafka01'].ansible_host }}:9096
 kafka_topic: "test-topic"
 kafka_group_name: "clickhouse_group"
 
