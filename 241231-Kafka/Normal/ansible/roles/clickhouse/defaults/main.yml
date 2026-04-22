@@ -1,0 +1,14 @@
+---
+# Базовая конфигурация роли clickhouse.
+clickhouse_version: "24.12.2.29"
+clickhouse_user: "default"
+clickhouse_password: ""
+clickhouse_host: "127.0.0.1"
+clickhouse_port: 9000
+
+clickhouse_database: "kafka_data"
+
+kafka_topic: "test-topic"
+kafka_group_name: "clickhouse_group"
+kafka_format: "JSONEachRow"
+kafka_num_consumers: 1

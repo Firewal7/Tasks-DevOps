@@ -1,20 +1,4 @@
 ---
-# Настройки ClickHouse
-clickhouse_version: "24.12.2.29"
-clickhouse_user: "default"
-clickhouse_password: ""
-clickhouse_host: "127.0.0.1"
-clickhouse_port: 9000
-
-clickhouse_database: "kafka_data"
-
-# Подключение Kafka к БД
+# Адреса брокеров с хоста Kafka.
 kafka_broker_list: >-
   {{ hostvars['kafka01'].ansible_host }}:9092,{{ hostvars['kafka01'].ansible_host }}:9094,{{ hostvars['kafka01'].ansible_host }}:9096
-kafka_topic: "test-topic"
-kafka_group_name: "clickhouse_group"
-
-# Дополнительные настройки
-kafka_format: "JSONEachRow"
-kafka_row_delimiter: "\n"
-kafka_num_consumers: 1
