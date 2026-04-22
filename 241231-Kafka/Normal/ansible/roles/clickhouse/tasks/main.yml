@@ -1,35 +1,36 @@
 ---
-# roles/clickhouse/tasks/main.yml
-
-- name: Обновляем кэш пакетов apt
-  ansible.builtin.apt:
-    update_cache: yes
-
-- name: Устанавливаем необходимые пакеты
+- name: Устанавливаем необходимые пакеты (с ретраями при lock)
   ansible.builtin.apt:
     name:
-      - apt-transport-https
       - ca-certificates
       - dirmngr
       - gnupg
       - curl
     state: present
+    update_cache: true
+    lock_timeout: 300
+  register: apt_result
+  retries: 5
+  delay: 15
+  until: apt_result is succeeded
 
-- name: Скачиваем и добавляем ключ ClickHouse GPG
-  ansible.builtin.shell: |
-    curl -fsSL 'https://packages.clickhouse.com/rpm/lts/repodata/repomd.xml.key' | gpg --dearmor -o /usr/share/keyrings/clickhouse-keyring.gpg
-  args:
+- name: Скачиваем ключ ClickHouse
+  ansible.builtin.get_url:
+    url: "https://packages.clickhouse.com/rpm/lts/repodata/repomd.xml.key"
+    dest: /tmp/clickhouse.key
+    mode: "0644"
+
+- name: Конвертируем ключ в keyring
+  ansible.builtin.command:
+    cmd: gpg --dearmor -o /usr/share/keyrings/clickhouse-keyring.gpg /tmp/clickhouse.key
     creates: /usr/share/keyrings/clickhouse-keyring.gpg
 
-- name: Добавляем репозиторий ClickHouse в список источников
-  ansible.builtin.shell: |
-    echo "deb [signed-by=/usr/share/keyrings/clickhouse-keyring.gpg] https://packages.clickhouse.com/deb stable main" | tee /etc/apt/sources.list.d/clickhouse.list
-  args:
-    creates: /etc/apt/sources.list.d/clickhouse.list
-
-- name: Обновляем кэш пакетов после добавления пакетов
-  ansible.builtin.apt:
-    update_cache: yes
+- name: Добавляем репозиторий ClickHouse
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/clickhouse-keyring.gpg] https://packages.clickhouse.com/deb stable main"
+    filename: clickhouse
+    state: present
+    update_cache: true
 
 - name: Устанавливаем ClickHouse
   ansible.builtin.apt:
@@ -43,16 +44,29 @@
   ansible.builtin.systemd:
     name: clickhouse-server
     state: started
-    enabled: yes
+    enabled: true
 
-- name: Применяем SQL-шаблон для настройки ClickHouse
+- name: Рендерим SQL-шаблон
   ansible.builtin.template:
-    src: "database.xml.j2"
-    dest: "/tmp/database.xml"
+    src: database.sql.j2
+    dest: /tmp/database.sql
+    mode: "0600"
+  when: clickhouse_user is defined and clickhouse_password is defined
 
-- name: Выполняем настройку ClickHouse
-  ansible.builtin.shell: |
-    cat /tmp/database.xml | clickhouse-client --host {{ clickhouse_host }} --port {{ clickhouse_port }} --user {{ clickhouse_user }} --password '{{ clickhouse_password }}' --multiquery
+- name: Применяем SQL в ClickHouse
+  ansible.builtin.command:
+    argv:
+      - clickhouse-client
+      - --host
+      - "{{ clickhouse_host }}"
+      - --port
+      - "{{ clickhouse_port | string }}"
+      - --user
+      - "{{ clickhouse_user }}"
+      - --password
+      - "{{ clickhouse_password }}"
+      - --multiquery
   args:
-    executable: /bin/bash
+    stdin: "{{ lookup('template', 'database.sql.j2') }}"
+  no_log: true
   when: clickhouse_user is defined and clickhouse_password is defined
