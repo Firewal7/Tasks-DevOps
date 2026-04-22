@@ -1,6 +1,4 @@
 ---
-# roles/kafka_ui/tasks/main.yml
-
 - name: Обновляем список пакетов
   ansible.builtin.apt:
     update_cache: yes
@@ -10,16 +8,16 @@
     name: docker.io
     state: present
 
-- name: Pull Kafka UI Docker image
-  docker_image:
+- name: Образ Kafka UI
+  community.docker.docker_image:
     name: provectuslabs/kafka-ui
-    tag: latest
+    tag: "{{ kafka_ui_image_tag }}"
     source: pull
 
-- name: Run Kafka UI container
-  docker_container:
+- name: Контейнер Kafka UI
+  community.docker.docker_container:
     name: kafka-ui
-    image: provectuslabs/kafka-ui:latest
+    image: "provectuslabs/kafka-ui:{{ kafka_ui_image_tag }}"
     state: started
     restart_policy: always
     ports:
@@ -27,6 +25,3 @@
     env:
       KAFKA_CLUSTERS_0_NAME: "{{ kafka_cluster_name }}"
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "{{ kafka_bootstrap_servers }}"
-      KAFKA_CLUSTERS_0_ZOOKEEPER: "{{ kafka_zookeeper }}"
-
-     
