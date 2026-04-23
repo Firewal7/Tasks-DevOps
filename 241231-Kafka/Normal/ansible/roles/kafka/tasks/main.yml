@@ -1,54 +1,120 @@
 ---
-# roles/kafka/tasks/main.yml
-
 - name: Обновляем список пакетов
   ansible.builtin.apt:
-    update_cache: yes
+    update_cache: true
 
 - name: Устанавливаем Java
   ansible.builtin.apt:
     name: openjdk-11-jdk
     state: present
 
+- name: Группа kafka
+  ansible.builtin.group:
+    name: kafka
+    state: present
+
+- name: Системный пользователь kafka
+  ansible.builtin.user:
+    name: kafka
+    system: true
+    create_home: false
+    home: /opt/kafka
+    shell: /usr/sbin/nologin
+    group: kafka
+
+- name: Строка controller.quorum.voters
+  ansible.builtin.set_fact:
+    kafka_kraft_quorum_voters: "{% for b in kafka_brokers %}{{ b.id }}@{{ kafka_controller_bind_address }}:{{ b.controller_port }}{{ ',' if not loop.last else '' }}{% endfor %}"
+
+- name: Каталоги данных KRaft
+  ansible.builtin.file:
+    path: "{{ item.log_dir }}"
+    state: directory
+    owner: kafka
+    group: kafka
+    mode: "0750"
+  loop: "{{ kafka_brokers }}"
+
 - name: Скачиваем Kafka
   ansible.builtin.get_url:
-    url: "https://dlcdn.apache.org/kafka/{{ kafka_version }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+    url: "https://downloads.apache.org/kafka/{{ kafka_version }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
     dest: "/tmp/kafka.tgz"
 
 - name: Распаковываем Kafka
   ansible.builtin.unarchive:
     src: "/tmp/kafka.tgz"
     dest: "/opt/"
-    remote_src: yes
+    remote_src: true
 
-- name: Переименовываем директорию в Kafka
+- name: Переименовываем директорию в /opt/kafka
   ansible.builtin.command:
     cmd: "mv /opt/kafka_{{ kafka_scala_version }}-{{ kafka_version }} /opt/kafka"
     creates: "/opt/kafka"
 
-- name: Создаём Kafka файлы конфигурации для каждого брокера
+- name: Владелец /opt/kafka
+  ansible.builtin.file:
+    path: /opt/kafka
+    owner: kafka
+    group: kafka
+    recurse: true
+
+- name: Каталог конфигов KRaft
+  ansible.builtin.file:
+    path: /opt/kafka/config/kraft
+    state: directory
+    owner: kafka
+    group: kafka
+    mode: "0755"
+
+- name: Конфиг KRaft для каждого брокера
   ansible.builtin.template:
-    src: server.properties.j2
-    dest: "/opt/kafka/config/server-{{ item.id }}.properties"
+    src: server-kraft.properties.j2
+    dest: "/opt/kafka/config/kraft/server-{{ item.id }}.properties"
+    owner: kafka
+    group: kafka
+    mode: "0644"
   loop: "{{ kafka_brokers }}"
 
-- name: Запускаем ZooKeeper
-  ansible.builtin.shell: "/opt/kafka/bin/zookeeper-server-start.sh /opt/kafka/config/zookeeper.properties &"
-  args:
-    executable: /bin/bash
+- name: UUID кластера KRaft
+  ansible.builtin.command:
+    cmd: sudo -u kafka /opt/kafka/bin/kafka-storage.sh random-uuid
+  register: kafka_cluster_uuid
+  changed_when: false
 
-- name: Запускаем Kafka брокеры
-  ansible.builtin.shell: "/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server-{{ item.id }}.properties &"
+- name: Форматирование хранилища KRaft (один раз на брокера)
+  ansible.builtin.command:
+    cmd: >-
+      sudo -u kafka /opt/kafka/bin/kafka-storage.sh format -t {{ kafka_cluster_uuid.stdout | trim }}
+      -c /opt/kafka/config/kraft/server-{{ item.id }}.properties
   args:
-    executable: /bin/bash
+    creates: "{{ item.log_dir }}/meta.properties"
   loop: "{{ kafka_brokers }}"
 
-- name: Проверяем существование топика
+- name: Unit systemd для каждого брокера
+  ansible.builtin.template:
+    src: kafka-kraft.service.j2
+    dest: "/etc/systemd/system/kafka-kraft-{{ item.id }}.service"
+    mode: "0644"
+  loop: "{{ kafka_brokers }}"
+
+- name: Включить и запустить брокеры KRaft
+  ansible.builtin.systemd:
+    name: "kafka-kraft-{{ item.id }}"
+    enabled: true
+    state: started
+    daemon_reload: true
+  loop: "{{ kafka_brokers }}"
+
+- name: Список топиков
   ansible.builtin.command: "/opt/kafka/bin/kafka-topics.sh --bootstrap-server {{ kafka_bootstrap_server }} --list"
   register: kafka_topics
+  changed_when: false
 
-- name: Создаём топик, если он не существует
-  ansible.builtin.shell: "/opt/kafka/bin/kafka-topics.sh --bootstrap-server {{ kafka_bootstrap_server }} --create --topic {{ kafka_topic_name }} --partitions {{ kafka_topic_partitions }} --replication-factor {{ kafka_topic_replication_factor }}"
-  args:
-    executable: /bin/bash
-  when: kafka_topic_name not in kafka_topics.stdout_lines
+- name: Создать топик при отсутствии
+  ansible.builtin.command:
+    cmd: >-
+      /opt/kafka/bin/kafka-topics.sh --bootstrap-server {{ kafka_bootstrap_server }}
+      --create --if-not-exists --topic {{ kafka_topic_name }}
+      --partitions {{ kafka_topic_partitions }}
+      --replication-factor {{ kafka_topic_replication_factor }}
+  changed_when: true
